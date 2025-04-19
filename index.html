@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio of Ramis Ali, a passionate Software Engineer specializing in full-stack development and 3D web experiences.">
+    <meta name="keywords" content="Software Engineer, Full-Stack Developer, 3D Web, Ramis Ali">
+    <meta name="author" content="Ramis Ali">
+    <title>Ramis Ali - Software Engineer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #2a2f4f;
+            --accent: #e6ff00;
+            --dark: #0c0c0c;
+            --light: #f5f5f5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(12, 12, 12, 0.3);
+            z-index: -1;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            position: relative;
+        }
+        
+        .content-wrapper {
+            perspective: 2000px;
+            transform-style: preserve-3d;
+        }
+        
+        section {
+            padding: 4rem 0;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+            background: rgba(12, 12, 12, 0.75);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            margin: 50px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        section:hover {
+            transform: translateZ(40px);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(12, 12, 12, 0.95);
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(230, 255, 0, 0.6);
+            transition: all 0.3s;
+        }
+        
+        .logo:hover {
+            transform: translateZ(20px);
+            text-shadow: 0 0 15px rgba(230, 255, 0, 0.8);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: width 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent);
+            transform: translateZ(10px);
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            margin-top: 0;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transform: translateZ(50px);
+            color: var(--accent);
+        }
+        
+        .hero h2 {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            font-weight: 400;
+            transform: translateZ(30px);
+            text-shadow: 0 0 10px rgba(230, 255, 0, 0.6);
+        }
+        
+        .hero p {
+            max-width: 800px;
+            margin-bottom: 2rem;
+            color: #d1d1d1;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            transform: translateZ(20px);
+        }
+        
+        .profile-pic {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 3px solid var(--accent);
+            margin-top: 60px;
+            margin-bottom: 2rem;
+            transform: translateZ(60px);
+            box-shadow: 0 0 20px rgba(230, 255, 0, 0.5);
+            transition: transform 0.3s;
+            object-fit: cover;
+            object-position: center;
+            filter: brightness(1.05) contrast(1.1);
+        }
+        
+        .profile-pic:hover {
+            transform: translateZ(80px) scale(1.1);
+        }
+        
+        .btn-container {
+            transform: translateZ(40px);
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: var(--dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.4s;
+            transform: skewX(-30deg);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px) translateZ(10px);
+            box-shadow: 0 5px 15px rgba(230, 255, 0, 0.3);
+        }
+        
+        .btn:hover::after {
+            left: 100%;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--accent);
+            color: var(--dark);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        
+        .section-title h2 {
+            font-size: 2rem;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+            transform: translateZ(30px);
+            color: var(--accent);
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            left: 25%;
+            bottom: 0;
+            width: 50%;
+            height: 3px;
+            background-color: var(--accent);
+            box-shadow: 0 0 10px rgba(230, 255, 0, 0.6);
+        }
+        
+        .skills {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            transform-style: preserve-3d;
+        }
+        
+        .skill-category {
+            background-color: rgba(18, 18, 18, 0.8);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            transform: translateZ(20px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .skill-category:hover {
+            transform: translateY(-5px) translateZ(40px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .skill-category h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(230, 255, 0, 0.6);
+        }
+        
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .skill-item {
+            background-color: #252525;
+            padding: 0.4rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .skill-item img {
+            max-width: 30px;
+            max-height: 30px;
+            object-fit: contain;
+            filter: brightness(1.2) saturate(1.5);
+        }
+        
+        .skill-item:hover {
+            transform: translateZ(10px);
+            background-color: var(--accent);
+            box-shadow: 0 0 10px rgba(230, 255, 0, 0.6);
+        }
+        
+        .skill-item:hover img {
+            filter: brightness(1.5) saturate(2);
+        }
+        
+        .skill-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: var(--light);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .skill-item:hover::after {
+            opacity: 1;
+        }
+        
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            transform-style: preserve-3d;
+        }
+        
+        .project-card {
+            background-color: rgba(18, 18, 18, 0.8);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            transform: translateZ(20px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px) translateZ(40px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .project-card h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 5px rgba(230, 255, 0, 0.6);
+        }
+        
+        .project-card p {
+            color: #d1d1d1;
+            margin-bottom: 1rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            transform-style: preserve-3d;
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background-color: rgba(18, 18, 18, 0.8);
+            border-radius: 50%;
+            text-decoration: none;
+            color: var(--light);
+            transition: all 0.3s;
+            transform: translateZ(20px);
+            font-size: 1.5rem;
+        }
+        
+        .social-link:hover {
+            transform: translateY(-3px) translateZ(30px);
+            background-color: #252525;
+            color: var(--accent);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        footer {
+            background-color: rgba(10, 10, 10, 0.9);
+            padding: 1.5rem 0;
+            text-align: center;
+            margin-top: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .mobile-menu {
+            display: none;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.2rem;
+            }
+            
+            .profile-pic {
+                width: 150px;
+                height: 150px;
+            }
+            
+            section {
+                padding: 3rem 0;
+            }
+        }
+        
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 250px;
+            height: 100vh;
+            background-color: rgba(10, 10, 10, 0.95);
+            z-index: 101;
+            padding: 2rem 1rem;
+            transition: right 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .mobile-nav.active {
+            right: 0;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            color: var(--light);
+            font-size: 1.5rem;
+        }
+        
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .mobile-nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .mobile-nav-links a:hover {
+            color: var(--accent);
+        }
+        
+        .tilt-container {
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px) translateZ(20px);
+            }
+            50% {
+                transform: translateY(-10px) translateZ(20px);
+            }
+            100% {
+                transform: translateY(0px) translateZ(20px);
+            }
+        }
+        
+        @keyframes glowText {
+            0% {
+                text-shadow: 0 0 5px rgba(230, 255, 0, 0.6);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(230, 255, 0, 0.9);
+            }
+            100% {
+                text-shadow: 0 0 5px rgba(230, 255, 0, 0.6);
+            }
+        }
+        
+        .float {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .glow-text {
+            animation: glowText 3s ease-in-out infinite;
+        }
+        
+        .polygoned-title {
+            font-size: 6rem;
+            font-weight: 900;
+            color: var(--accent);
+            font-style: italic;
+            letter-spacing: -2px;
+            transform: translateZ(60px);
+            margin-bottom: 2rem;
+            text-shadow: 4px 4px 0px rgba(12, 12, 12, 0.8);
+            animation: glowText 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas" aria-label="3D background canvas"></canvas>
+    <div class="bg-overlay"></div>
+
+    <nav id="navbar" role="navigation">
+        <div class="container">
+            <div class="logo float">RA</div>
+            <div class="nav-links">
+                <a href="#home" aria-label="Go to Home section">Home</a>
+                <a href="#skills" aria-label="Go to Skills section">Skills</a>
+                <a href="#projects" aria-label="Go to Projects section">Projects</a>
+                <a href="#github" aria-label="Go to GitHub section">GitHub</a>
+                <a href="#contact" aria-label="Go to Contact section">Contact</a>
+            </div>
+            <div class="mobile-menu" id="mobile-menu" aria-label="Open mobile menu">☰</div>
+        </div>
+    </nav>  
+    
+    <div class="mobile-nav" id="mobile-nav">
+        <div class="close-btn" id="close-btn" aria-label="Close mobile menu">×</div>
+        <div class="mobile-nav-links">
+            <a href="#home" class="mobile-nav-link" aria-label="Go to Home section">Home</a>
+            <a href="#skills" class="mobile-nav-link" aria-label="Go to Skills section">Skills</a> 
+            <a href="#projects" class="mobile-nav-link" aria-label="Go to Projects section">Projects</a>
+            <a href="#github" class="mobile-nav-link" aria-label="Go to GitHub section">GitHub</a>
+            <a href="#contact" class="mobile-nav-link" aria-label="Go to Contact section">Contact</a>
+        </div>
+    </div>
+    
+    <div class="content-wrapper">
+        <section class="hero tilt-container" id="home">
+            <div class="container">
+                <img 
+                    src="profile-pic.jpg" 
+                    alt="Ramis Ali profile picture" 
+                    class="profile-pic"
+                    onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200/e6ff00/0c0c0c?text=RA'"
+                >
+                <div class="polygoned-title">POLYGONED</div>
+                <h1>Ramis Ali</h1>
+                <h2>Software Engineer | Full-Stack Developer</h2>
+                <p>Results-driven engineer with a passion for building scalable, efficient, and innovative solutions. I specialize in full-stack development, automation, and data-driven applications.</p>
+                <div class="btn-container">
+                    <a href="#contact" class="btn" aria-label="Contact Ramis Ali">Contact Me</a>
+                    <a href="#projects" class="btn btn-outline" aria-label="View Ramis Ali's projects">View Projects</a>
+                </div>
+            </div>
+        </section>
+        
+        <section id="skills" class="tilt-container">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Tech Stack</h2>
+                </div>
+                <div class="skills">
+                    <div class="skill-category">
+                        <h3>Programming Languages</h3>
+                        <div class="skill-list">
+                            <span class="skill-item" data-tooltip="C++"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/cplusplus.svg" alt="C++ logo" onerror="this.src='https://img.icons8.com/color/48/000000/c-plus-plus-logo.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Java"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/java.svg" alt="Java logo" onerror="this.src='https://img.icons8.com/color/48/000000/java-coffee-cup-logo.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Python"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/python.svg" alt="Python logo" onerror="this.src='https://img.icons8.com/color/48/000000/python.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="JavaScript"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/javascript.svg" alt="JavaScript logo" onerror="this.src='https://img.icons8.com/color/48/000000/javascript.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="TypeScript"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/typescript.svg" alt="TypeScript logo" onerror="this.src='https://img.icons8.com/color/48/000000/typescript.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Haskell"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/haskell.svg" alt="Haskell logo" onerror="this.src='https://img.icons8.com/color/48/000000/haskell.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="R"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/r.svg" alt="R logo" onerror="this.src='https://img.icons8.com/color/48/000000/r-project.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Go"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/go.svg" alt="Go logo" onerror="this.src='https://img.icons8.com/color/48/000000/go.png'" style="filter: brightness(0)"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h3>Web Development</h3>
+                        <div class="skill-list">
+                            <span class="skill-item" data-tooltip="HTML5"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/html5.svg" alt="HTML5 logo" onerror="this.src='https://img.icons8.com/color/48/000000/html-5.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="CSS3"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/css3.svg" alt="CSS3 logo" onerror="this.src='https://img.icons8.com/color/48/000000/css3.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="React"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/react.svg" alt="React logo" onerror="this.src='https://img.icons8.com/color/48/000000/react-native.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Node.js"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/nodedotjs.svg" alt="Node.js logo" onerror="this.src='https://img.icons8.com/color/48/000000/nodejs.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Express"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/express.svg" alt="Express logo" onerror="this.src='https://img.icons8.com/color/48/000000/express.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Redux"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/redux.svg" alt="Redux logo" onerror="this.src='https://img.icons8.com/color/48/000000/redux.png'" style="filter: brightness(0)"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h3>Tools & Technologies</h3>
+                        <div class="skill-list">
+                            <span class="skill-item" data-tooltip="Git"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/git.svg" alt="Git logo" onerror="this.src='https://img.icons8.com/color/48/000000/git.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Docker"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/docker.svg" alt="Docker logo" onerror="this.src='https://img.icons8.com/color/48/000000/docker.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Selenium"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/selenium.svg" alt="Selenium logo" onerror="this.src='https://img.icons8.com/color/48/000000/selenium-test-automation.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="Linux"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/linux.svg" alt="Linux logo" onerror="this.src='https://img.icons8.com/color/48/000000/linux.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="MySQL"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/mysql.svg" alt="MySQL logo" onerror="this.src='https://img.icons8.com/color/48/000000/mysql.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="MongoDB"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/mongodb.svg" alt="MongoDB logo" onerror="this.src='https://img.icons8.com/color/48/000000/mongodb.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="PostgreSQL"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/postgresql.svg" alt="PostgreSQL logo" onerror="this.src='https://img.icons8.com/color/48/000000/postgreesql.png'" style="filter: brightness(0)"></span>
+                            <span class="skill-item" data-tooltip="AWS"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/amazonaws.svg" alt="AWS logo" onerror="this.src='https://img.icons8.com/color/48/000000/amazon-web-services.png'" style="filter: brightness(0)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="projects" class="tilt-container">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Current Projects</h2>
+                </div>
+                <div class="projects">
+                    <div class="project-card">
+                        <h3>Web Scraping & Data Extraction 🕷️</h3>
+                        <p>Developing advanced Python-based web scrapers to extract and analyze large datasets, including research papers from NeurIPS and other academic platforms.</p>
+                    </div>
+                    
+                    <div class="project-card">
+                        <h3>Test Automation Framework 🤖</h3>
+                        <p>Building a robust Selenium-based automation framework to streamline testing processes and improve software quality.</p>
+                    </div>
+                    
+                    <div class="project-card">
+                        <h3>Full-Stack Web Applications 🌎</h3>
+                        <p>Designing and deploying scalable web applications using React, Node.js, Express.js, and MongoDB/PostgreSQL.</p>
+                    </div>
+                    
+                    <div class="project-card">
+                        <h3>Open-Source Contributions 🌟</h3>
+                        <p>Actively contributing to open-source projects to give back to the developer community and improve my skills.</p>
+                    </div>
+                    
+                    <div class="project-card">
+                        <h3>Machine Learning Models 🧠</h3>
+                        <p>Developing and training neural network models for image classification and natural language processing tasks using TensorFlow and PyTorch.</p>
+                    </div>
+                    
+                    <div class="project-card">
+                        <h3>Blockchain Development 🔗</h3>
+                        <p>Exploring and implementing smart contracts and decentralized applications using Solidity and Ethereum blockchain technology.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="github" class="tilt-container">
+            <div class="container">
+                <div class="section-title">
+                    <h2>GitHub Profile</h2>
+                </div>
+                <p style="text-align: center; margin-bottom: 1.5rem; transform: translateZ(20px);">Check out my GitHub profile to see my contributions, repositories, and coding activity.</p>
+                <div style="text-align: center; transform: translateZ(30px);">
+                    <a href="https://github.com/Ramisali007" class="btn" target="_blank" aria-label="Visit Ramis Ali's GitHub profile">Visit My GitHub</a>
+                </div>
+            </div>
+        </section>
+        
+        <section id="contact" class="tilt-container">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Connect with Me</h2>
+                </div>
+                <div class="social-links">
+                    <a href="https://linkedin.com/in/iramisali" class="social-link" target="_blank" aria-label="Visit Ramis Ali's LinkedIn profile">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://medium.com/@iramisali" class="social-link" target="_blank" aria-label="Visit Ramis Ali's Medium profile">
+                        <i class="fab fa-medium-m"></i>
+                    </a>
+                    <a href="https://twitter.com/RamisAli123" class="social-link" target="_blank" aria-label="Visit Ramis Ali's Twitter profile">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="mailto:ramisali.k786@gmail.com" class="social-link" aria-label="Email Ramis Ali">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                    <a href="https://instagram.com/ramis_alyy" class="social-link" target="_blank" aria-label="Visit Ramis Ali's Instagram profile">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://github.com/Ramisali007" class="social-link" target="_blank" aria-label="Visit Ramis Ali's GitHub profile">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>© 2025 Ramis Ali. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Utility Functions
+        const initMobileNav = () => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileNav = document.getElementById('mobile-nav');
+            const closeBtn = document.getElementById('close-btn');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            
+            mobileMenu.addEventListener('click', () => {
+                mobileNav.classList.add('active');
+            });
+            
+            closeBtn.addEventListener('click', () => {
+                mobileNav.classList.remove('active');
+            });
+            
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNav.classList.remove('active');
+                });
+            });
+        };
+
+        const initSmoothScrolling = () => {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        };
+
+        const initTiltEffect = () => {
+            const tiltContainers = document.querySelectorAll('.tilt-container');
+            tiltContainers.forEach(container => {
+                container.addEventListener('mousemove', (e) => {
+                    const rect = container.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const xRotation = ((y - rect.height / 2) / rect.height) * 8;
+                    const yRotation = ((x - rect.width / 2) / rect.width) * -8;
+                    container.style.transform = `perspective(1000px) rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
+                });
+                container.addEventListener('mouseleave', () => {
+                    container.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                });
+            });
+        };
+
+        const initThreeJS = () => {
+            const canvas = document.getElementById('bg-canvas');
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // Background Image
+            const textureLoader = new THREE.TextureLoader();
+            const bgTexture = textureLoader.load(
+                'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+                () => console.log('Background loaded successfully'),
+                undefined,
+                (err) => console.error('Error loading background:', err)
+            );
+            const bgGeometry = new THREE.PlaneGeometry(16, 9);
+            const bgMaterial = new THREE.MeshBasicMaterial({ 
+                map: bgTexture,
+                transparent: true,
+                opacity: 0.8
+            });
+            const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
+            bgMesh.position.z = -10;
+            bgMesh.scale.set(1.5, 1.5, 1);
+            scene.add(bgMesh);
+
+            // Enhanced Head with Particle Effects
+            const headGeometry = new THREE.SphereGeometry(2, 64, 64);
+            const headMaterial = new THREE.MeshStandardMaterial({
+                color: 0x444444,
+                metalness: 0.9,
+                roughness: 0.1,
+                emissive: 0x222222
+            });
+            const headMesh = new THREE.Mesh(headGeometry, headMaterial);
+            headMesh.position.z = -5;
+            scene.add(headMesh);
+
+            // Particle System for Ambient Effects
+            const particleGeometry = new THREE.BufferGeometry();
+            const particleCount = 1000;
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 20;
+                positions[i + 1] = (Math.random() - 0.5) * 20;
+                positions[i + 2] = (Math.random() - 0.5) * 20;
+            }
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0xe6ff00,
+                size: 0.05,
+                transparent: true,
+                opacity: 0.8
+            });
+            const particles = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particles);
+
+            // Butterfly with Enhanced Animation
+            const butterflyGeometry = new THREE.BufferGeometry();
+            const vertices = new Float32Array([
+                -0.5, 0.5, 0, -0.1, 0, 0, -0.8, 0, 0,
+                0.5, 0.5, 0, 0.1, 0, 0, 0.8, 0, 0,
+                -0.5, -0.5, 0, -0.1, 0, 0, -0.8, 0, 0,
+                0.5, -0.5, 0, 0.1, 0, 0, 0.8, 0, 0,
+            ]);
+            butterflyGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            const butterflyMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff8800,
+                side: THREE.DoubleSide
+            });
+            const butterflyMesh = new THREE.Mesh(butterflyGeometry, butterflyMaterial);
+            butterflyMesh.scale.set(0.4, 0.4, 0.4);
+            butterflyMesh.position.set(1, 1, -4);
+            scene.add(butterflyMesh);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const redLight = new THREE.PointLight(0xff0000, 2, 20);
+            redLight.position.set(5, 2, 2);
+            scene.add(redLight);
+            const blueLight = new THREE.PointLight(0x0066ff, 2, 20);
+            blueLight.position.set(-5, -2, 2);
+            scene.add(blueLight);
+            const purpleLight = new THREE.PointLight(0xaa00ff, 1.5, 20);
+            purpleLight.position.set(0, 3, 3);
+            scene.add(purpleLight);
+
+            // Cracks with Glow Effect
+            const createCracks = () => {
+                const crackGeometry = new THREE.BufferGeometry();
+                const crackVertices = [];
+                const generateCrack = (startX, startY, startZ, iterations) => {
+                    let x = startX, y = startY, z = startZ;
+                    crackVertices.push(x, y, z);
+                    for (let i = 0; i < iterations; i++) {
+                        const dx = (Math.random() - 0.5) * 0.2;
+                        const dy = (Math.random() - 0.5) * 0.2;
+                        const dz = (Math.random() - 0.5) * 0.05;
+                        x += dx;
+                        y += dy;
+                        z += dz;
+                        crackVertices.push(x, y, z);
+                    }
+                };
+                for (let i = 0; i < 20; i++) {
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.random() * Math.PI;
+                    const x = 2 * Math.sin(phi) * Math.cos(theta);
+                    const y = 2 * Math.sin(phi) * Math.sin(theta);
+                    const z = 2 * Math.cos(phi);
+                    generateCrack(x, y, z, 5 + Math.floor(Math.random() * 10));
+                }
+                crackGeometry.setAttribute('position', new THREE.Float32BufferAttribute(crackVertices, 3));
+                const crackMaterial = new THREE.LineBasicMaterial({ 
+                    color: 0x00ff00,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const crackLines = new THREE.LineSegments(crackGeometry, crackMaterial);
+                scene.add(crackLines);
+            };
+            createCracks();
+
+            // Animation Loop
+            const animate = () => {
+                requestAnimationFrame(animate);
+                headMesh.rotation.y += 0.003;
+                butterflyMesh.rotation.x = Math.sin(Date.now() * 0.005) * 0.3;
+                butterflyMesh.position.y = Math.sin(Date.now() * 0.001) * 0.5 + 1;
+                redLight.position.x = Math.sin(Date.now() * 0.001) * 5;
+                blueLight.position.x = Math.cos(Date.now() * 0.001) * 5;
+                particles.rotation.y += 0.001;
+                renderer.render(scene, camera);
+            };
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            animate();
+        };
+
+        // Initialize Everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initMobileNav();
+            initSmoothScrolling();
+            initTiltEffect();
+            initThreeJS();
+        });
+    </script>
+</body>
+</html>
